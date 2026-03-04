@@ -72,13 +72,11 @@ $$
 ---
 
 ## 4) Modified DH Transform Definition
-Define shorthand:
-$$
-c_i = \cos(\theta_i),\quad s_i=\sin(\theta_i),\quad
-c_{\alpha i}=\cos(\alpha_i),\quad s_{\alpha i}=\sin(\alpha_i).
-$$
+
+Define shorthand $c_i=\cos(\theta_i)$, $s_i=\sin(\theta_i)$, $c_{\alpha i}=\cos(\alpha_i)$, and $s_{\alpha i}=\sin(\alpha_i)$.
 
 Then the Modified DH transform from frame $(i-1)$ to frame $i$ is:
+
 $$
 {}^{i-1}T_i =
 \begin{bmatrix}
@@ -89,7 +87,7 @@ s_i s_{\alpha i} & c_i s_{\alpha i} & c_{\alpha i} & c_{\alpha i}\,d_i \\
 \end{bmatrix}.
 $$
 
-> Important: This is **Modified DH**, not Standard DH. Do not swap conventions mid-derivation.
+> Important: This is Modified DH, not Standard DH. Do not swap conventions mid-derivation.
 
 ---
 
