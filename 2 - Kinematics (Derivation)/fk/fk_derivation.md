@@ -195,12 +195,122 @@ $$
 {}^{0}T_6(q) = {}^{0}T_1\;{}^{1}T_2\;{}^{2}T_3\;{}^{3}T_4\;{}^{4}T_5\;{}^{5}T_6.
 $$
 
-### 6.1 Practical implementation note
-Do **not** hand-expand the final matrix unless you specifically need a symbolic closed form.  
-In software, compute ${}^{0}T_6$ via numerical matrix multiplication:
-1. Compute each $\theta_i(q_i)$ (include offsets and sign flips).
-2. Build each ${}^{i-1}T_i$ from Section 5.
-3. Multiply in order to obtain ${}^{0}T_6$.
+## 6) Overall Forward Kinematics (closed-form symbolic)
+
+This section provides the **closed-form** ${}^{0}T_6(q)$ obtained by multiplying out
+${}^{0}T_1\,{}^{1}T_2\,{}^{2}T_3\,{}^{3}T_4\,{}^{4}T_5\,{}^{5}T_6$.
+
+### 6.0 Shorthand (for compact closed form)
+
+Define:
+$$
+c1=\cos q_1,\ s1=\sin q_1,\quad
+c4=\cos q_4,\ s4=\sin q_4,\quad
+c5=\cos q_5,\ s5=\sin q_5.
+$$
+
+Since $\theta_6=\pi-q_6$ (from offsets/signs), define:
+$$
+c6=\cos(\pi-q_6)=-\cos q_6,\qquad s6=\sin(\pi-q_6)=\sin q_6.
+$$
+
+Also define the coupled shoulder–elbow angle:
+$$
+c_{23}=\cos(q_2+q_3),\qquad s_{23}=\sin(q_2+q_3).
+$$
+
+Define the “arm geometry” scalar (mm):
+$$
+B = 500 + 1300\cos q_2 + 1025\,c_{23} - 55\,s_{23}.
+$$
+
+---
+
+### 6.1 Closed-form rotation $R_{06}(q)$
+
+Let:
+$$
+R_{06}=
+\begin{bmatrix}
+R_{11} & R_{12} & R_{13}\\
+R_{21} & R_{22} & R_{23}\\
+R_{31} & R_{32} & R_{33}
+\end{bmatrix}.
+$$
+
+Third column (also used in the position offset):
+$$
+\begin{aligned}
+R_{13}&=-s5\,(s1\,s4 + s_{23}\,c1\,c4) + c5\,(c1\,c_{23}),\\
+R_{23}&=-s5\,(-s1\,s_{23}\,c4 + s4\,c1) + c5\,(-s1\,c_{23}),\\
+R_{33}&=-s5\,(c4\,c_{23}) + c5\,(-s_{23}).
+\end{aligned}
+$$
+
+First column:
+$$
+\begin{aligned}
+R_{11}&=c6\,c5\,(s1\,s4 + s_{23}\,c1\,c4) + c6\,s5\,(c1\,c_{23}) + s6\,(-s1\,c4 + s_{23}\,c1\,s4),\\
+R_{21}&=c6\,c5\,(-s1\,s_{23}\,c4 + s4\,c1) + c6\,s5\,(-s1\,c_{23}) + s6\,(-s1\,s4\,s_{23} - c1\,c4),\\
+R_{31}&=c6\,c5\,(c4\,c_{23}) + c6\,s5\,(-s_{23}) + s6\,(s4\,c_{23}).
+\end{aligned}
+$$
+
+Second column:
+$$
+\begin{aligned}
+R_{12}&=-s6\,c5\,(s1\,s4 + s_{23}\,c1\,c4) - s6\,s5\,(c1\,c_{23}) + c6\,(-s1\,c4 + s_{23}\,c1\,s4),\\
+R_{22}&=-s6\,c5\,(-s1\,s_{23}\,c4 + s4\,c1) - s6\,s5\,(-s1\,c_{23}) + c6\,(-s1\,s4\,s_{23} - c1\,c4),\\
+R_{32}&=-s6\,c5\,(c4\,c_{23}) - s6\,s5\,(-s_{23}) + c6\,(s4\,c_{23}).
+\end{aligned}
+$$
+
+---
+
+### 6.2 Closed-form position $p_{06}(q)$ (mm)
+
+First, the origin of frame 4 expressed in the base frame:
+$$
+p_{04}=
+\begin{bmatrix}
+c1\,B\\
+-s1\,B\\
+1045 -1300\sin q_2 -1025\,s_{23} -55\,c_{23}
+\end{bmatrix}.
+$$
+
+The last link has $a_6=0$ and $d_6=290$, so the end-effector origin is:
+$$
+p_{06} = p_{04} + 290
+\begin{bmatrix}
+R_{13}\\
+R_{23}\\
+R_{33}
+\end{bmatrix}.
+$$
+
+Equivalently, component-wise:
+$$
+\begin{aligned}
+p_x &= c1\,B + 290\,R_{13},\\
+p_y &= -s1\,B + 290\,R_{23},\\
+p_z &= 1045 -1300\sin q_2 -1025\,s_{23} -55\,c_{23} + 290\,R_{33}.
+\end{aligned}
+$$
+
+---
+
+### 6.3 Final closed-form homogeneous transform ${}^{0}T_6(q)$
+
+$$
+{}^{0}T_6(q)=
+\begin{bmatrix}
+R_{11} & R_{12} & R_{13} & p_x\\
+R_{21} & R_{22} & R_{23} & p_y\\
+R_{31} & R_{32} & R_{33} & p_z\\
+0 & 0 & 0 & 1
+\end{bmatrix}.
+$$
 
 ---
 
