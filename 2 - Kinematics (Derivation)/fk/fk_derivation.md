@@ -3,7 +3,7 @@
 **Source of DH parameters:** RobotKinematicsCatalogue (`KUKA_KR500_R2830.py`)  
 **Units:** angles in rad, lengths in mm
 
-This document implements **Task A — Forward Kinematics (FK)** per the Project 1 instructions. :contentReference[oaicite:0]{index=0}
+This document implements **Task A — Forward Kinematics (FK)** per the Project 1 instructions.
 
 ---
 
