@@ -8,7 +8,7 @@ This document implements **Task A — Forward Kinematics (FK)** per the Project 
 ---
 
 ## 1. Task A Requirements Checklist
-Per the project handout, Task A requires: :contentReference[oaicite:1]{index=1}
+Per the project handout, Task A requires:
 - [x] Assign coordinate frames following DH convention  
 - [x] Derive individual transforms \,^{i-1}T_i for i = 1..6  
 - [x] Compute overall tool transform \(T^{\text{tool}}_{\text{base}} = {}^{0}T_1 {}^{1}T_2 \cdots {}^{5}T_6\)  
@@ -152,7 +152,7 @@ The full end-effector transform is the ordered product:
 {}^{0}\!T_6(q) = {}^{0}\!T_1\;{}^{1}\!T_2\;{}^{2}\!T_3\;{}^{3}\!T_4\;{}^{4}\!T_5\;{}^{5}\!T_6.
 \]
 
-Implementation note: in code, compute this by **numerical matrix multiplication** (do not hand-expand unless needed for a symbolic appendix). This is the standard, robust approach and matches the project expectation for Task A. :contentReference[oaicite:2]{index=2}
+Implementation note: in code, compute this by **numerical matrix multiplication** (do not hand-expand unless needed for a symbolic appendix). This is the standard, robust approach and matches the project expectation for Task A.
 
 ---
 
@@ -178,7 +178,7 @@ If your computed result is wildly different (e.g., wrong sign on z, or magnitude
 ---
 
 ## 7. Task A Validation Against RoboDK (required by handout)
-The project instructions require RoboDK validation of FK (Task A). :contentReference[oaicite:3]{index=3}
+The project instructions require RoboDK validation of FK (Task A).
 
 ### 7.1 Test plan
 1. Choose 5–10 test joint configurations \(q^{(k)}\) (include:
@@ -202,7 +202,7 @@ Include either:
 - screenshots of RoboDK with the joint values and tool pose visible, **and/or**
 - a small validation table with numeric error metrics.
 
-> If RoboDK pose readout is limited by licensing, use it at minimum as a **visual** confirmation and include a fallback numerical cross-check against an independent FK source (e.g., the catalogue FK script). However, RoboDK comparison is the stated ground-truth reference in the instructions. :contentReference[oaicite:4]{index=4}
+> If RoboDK pose readout is limited by licensing, use it at minimum as a **visual** confirmation and include a fallback numerical cross-check against an independent FK source (e.g., the catalogue FK script). However, RoboDK comparison is the stated ground-truth reference in the instructions.
 
 ---
 
@@ -211,4 +211,4 @@ Include either:
 - Modified-DH transform definition
 - Explicit per-joint transforms \(^{i-1}T_i\)
 - Overall FK product \(^{0}T_6\)
-- A clear validation procedure aligned to Task A :contentReference[oaicite:5]{index=5}
+- A clear validation procedure aligned to Task A
