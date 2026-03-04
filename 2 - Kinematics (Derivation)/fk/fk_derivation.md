@@ -45,16 +45,21 @@ $$
 | 6 | $-\pi/2$ | $0$ | $290$ | $+\pi$ |
 
 ### 3.2 Joint sign convention + offsets (what enters FK)
+
 The effective angle used in the per-link transform is:
+
 $$
-\theta_i(q_i) = \theta_{0,i} + s_i\,q_i,
+\theta_i(q_i) = \theta_{0,i} + s_i\,q_i
 $$
+
 with
+
 $$
 s = [s_1,\dots,s_6] = [-1,\ 1,\ 1,\ -1,\ 1,\ -1].
 $$
 
 So explicitly:
+
 $$
 \theta_1=-q_1,\quad
 \theta_2=q_2,\quad
