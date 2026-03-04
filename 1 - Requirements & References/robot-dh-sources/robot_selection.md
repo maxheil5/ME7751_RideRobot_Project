@@ -1,11 +1,11 @@
-# Robot Selection
+﻿# Robot Selection
 
-## Selected Robot (TBD)
-- Robot name/model:
-- Rationale (1–3 bullets):
-  - Public DH table available (citable)
-  - 6-DOF serial architecture compatible with analytical IK (spherical wrist preferred)
-  - Plausible “ride arm” analog (inspiration: KUKA RoboCoaster-style motion)
+## Selected Robot
+- Robot name/model: **KUKA KR 500 R2830**
+- Rationale (1-3 bullets):
+  - Publicly available modified DH table via RobotKinematicsCatalogue.
+  - Standard 6-DOF serial architecture with spherical wrist, enabling analytical IK.
+  - Heavy-duty RoboCoaster-style arm (500 kg payload, ~2.83 m reach) aligned with ride-vehicle inspiration.
 
 ## Candidate Shortlist
 1) KUKA KR6 / KR series (public DH tables exist in papers; easier to scale physically)
