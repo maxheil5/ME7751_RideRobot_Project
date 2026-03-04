@@ -23,8 +23,16 @@ This document is the Task A (FK) writeup: define the DHM parameters, define the 
 - FK output: ${}^{0}T_6(q)$ (pose of frame 6 expressed in base frame 0)
 
 A homogeneous transform is written as:
-${}^{0}T_6 = \begin{bmatrix} R_{06} & p_{06} \\ 0\ 0\ 0 & 1 \end{bmatrix},$
-where $R_{06}\in SO(3)$ and $p_{06}\in\mathbb{R}^3$ (mm).
+
+$$
+{}^{0}T_6 =
+\begin{bmatrix}
+R_{06} & p_{06} \\
+0\ 0\ 0 & 1
+\end{bmatrix},
+$$
+
+where $R_{06}\in SO(3)$ and $p_{06}\in \mathbb{R}^3$ (mm).
 
 ---
 
