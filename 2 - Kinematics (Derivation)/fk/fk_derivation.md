@@ -195,11 +195,6 @@ $$
 {}^{0}T_6(q) = {}^{0}T_1\;{}^{1}T_2\;{}^{2}T_3\;{}^{3}T_4\;{}^{4}T_5\;{}^{5}T_6.
 $$
 
-## 6) Overall Forward Kinematics (closed-form symbolic)
-
-This section provides the **closed-form** ${}^{0}T_6(q)$ obtained by multiplying out
-${}^{0}T_1\,{}^{1}T_2\,{}^{2}T_3\,{}^{3}T_4\,{}^{4}T_5\,{}^{5}T_6$.
-
 ### 6.0 Shorthand (for compact closed form)
 
 Define:
