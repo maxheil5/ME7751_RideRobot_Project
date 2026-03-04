@@ -38,6 +38,7 @@ where $R_{06}\in SO(3)$ and $p_{06}\in \mathbb{R}^3$ (mm).
 
 ## 3) Given Kinematic Parameters (Modified DHM)
 Each joint $i$ uses DHM parameters:
+
 $$
 [\alpha_i,\ a_i,\ d_i,\ \theta_{0,i}].
 $$
@@ -104,7 +105,9 @@ Below are the six transforms with the KR500 parameters substituted.
 Let $\theta_i$ be defined in Section 3.2.
 
 ### 5.1 ${}^{0}T_1$  ($\alpha_1=0,\ a_1=0,\ d_1=1045$)
-Since $\cos 0 = 1$, $\sin 0 = 0$:
+
+Since $\cos 0 = 1$ and $\sin 0 = 0$:
+
 $$
 {}^{0}T_1 =
 \begin{bmatrix}
@@ -116,7 +119,9 @@ $$
 $$
 
 ### 5.2 ${}^{1}T_2$  ($\alpha_2=-\pi/2,\ a_2=500,\ d_2=0$)
-Use $\cos(-\pi/2)=0$, $\sin(-\pi/2)=-1$:
+
+Use $\cos(-\pi/2)=0$ and $\sin(-\pi/2)=-1$:
+
 $$
 {}^{1}T_2 =
 \begin{bmatrix}
@@ -128,6 +133,7 @@ $$
 $$
 
 ### 5.3 ${}^{2}T_3$  ($\alpha_3=0,\ a_3=1300,\ d_3=0$)
+
 $$
 {}^{2}T_3 =
 \begin{bmatrix}
@@ -139,7 +145,9 @@ $$
 $$
 
 ### 5.4 ${}^{3}T_4$  ($\alpha_4=-\pi/2,\ a_4=-55,\ d_4=1025$)
-Use $\cos(-\pi/2)=0$, $\sin(-\pi/2)=-1$:
+
+Use $\cos(-\pi/2)=0$ and $\sin(-\pi/2)=-1$:
+
 $$
 {}^{3}T_4 =
 \begin{bmatrix}
@@ -151,7 +159,9 @@ $$
 $$
 
 ### 5.5 ${}^{4}T_5$  ($\alpha_5=+\pi/2,\ a_5=0,\ d_5=0$)
-Use $\cos(\pi/2)=0$, $\sin(\pi/2)=1$:
+
+Use $\cos(\pi/2)=0$ and $\sin(\pi/2)=1$:
+
 $$
 {}^{4}T_5 =
 \begin{bmatrix}
@@ -163,7 +173,9 @@ $$
 $$
 
 ### 5.6 ${}^{5}T_6$  ($\alpha_6=-\pi/2,\ a_6=0,\ d_6=290$)
-Use $\cos(-\pi/2)=0$, $\sin(-\pi/2)=-1$:
+
+Use $\cos(-\pi/2)=0$ and $\sin(-\pi/2)=-1$:
+
 $$
 {}^{5}T_6 =
 \begin{bmatrix}
@@ -178,6 +190,7 @@ $$
 
 ## 6) Overall Forward Kinematics
 The full FK is the ordered product:
+
 $$
 {}^{0}T_6(q) = {}^{0}T_1\;{}^{1}T_2\;{}^{2}T_3\;{}^{3}T_4\;{}^{4}T_5\;{}^{5}T_6.
 $$
@@ -203,8 +216,14 @@ For any joint configuration:
 Set $q=[0,0,0,0,0,0]$ (rad). With the given DHM geometry, the computed end-effector position should be on the order of a few meters in $x$ and roughly $\sim 1$ meter in $z$.
 
 A quick numerical evaluation gives approximately:
+
 $$
-p_{06}(0) \approx \begin{bmatrix}3115\\0\\990\end{bmatrix}\ \text{mm}.
+p_{06}(0) \approx
+\begin{bmatrix}
+3115\\
+0\\
+990
+\end{bmatrix}\ \text{mm}.
 $$
 
 If you get something wildly different (wrong magnitude or flipped axes), check:
@@ -229,11 +248,13 @@ For each test:
 Let $p_{\text{FK}}$, $R_{\text{FK}}$ be from your FK; $p_{\text{ref}}$, $R_{\text{ref}}$ from reference.
 
 - Position error:
+
 $$
 e_p = \|p_{\text{FK}}-p_{\text{ref}}\|.
 $$
 
 - Orientation error via relative rotation:
+
 $$
 R_{\text{err}} = R_{\text{FK}}^T R_{\text{ref}},
 \qquad
