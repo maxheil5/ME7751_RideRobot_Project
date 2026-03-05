@@ -10,7 +10,7 @@ The app supports:
 - Waypoint input in **Joint mode** or **Pose mode**.
 - **MoveJ** planning with cubic/trapezoid profile.
 - **MoveL** planning with Cartesian interpolation and IK at each step.
-- 3D robot viewer (hybrid: optional URDF + procedural DH chain).
+- 3D robot viewer (hybrid: bundled URDF + procedural DH fallback).
 - Joint trajectory plots (`q1...q6` vs step).
 - Status reporting for IK failures, singularity events, and limit issues.
 - Built-in sanity checks for Task D acceptance tests.
@@ -94,18 +94,26 @@ Use the **Sanity Checks** panel in the UI:
 
 `RobotViewer` uses a hybrid strategy:
 
-- If `VITE_URDF_URL` is provided in `app/.env`, it attempts URDF loading.
-- Procedural DH chain rendering is always available and is used as fallback/default.
+- It attempts to load a bundled KUKA iiwa URDF by default:
+  - `app/public/assets/robot_urdf/kuka_iiwa/model_free_base.urdf`
+- Joint values are applied from the planner (`q1..q6`) to matching URDF joints.
+- Procedural DH chain rendering is used as a fallback if URDF loading fails.
 
 Example `app/.env`:
 
 ```env
-VITE_URDF_URL=/assets/robot.urdf
+VITE_URDF_URL=/assets/robot_urdf/kuka_iiwa/model_free_base.urdf
+VITE_URDF_PACKAGES=/assets/robot_urdf/kuka_iiwa
 ```
 
 ## 7) Limitations
 
+- Bundled URDF is KUKA iiwa (7-DOF) while project kinematics are KR500 (6-DOF). The 7th URDF joint is held at zero.
 - URDF loading depends on valid URDF and mesh paths; missing meshes fall back to procedural chain.
 - MoveL uses local midpoint subdivision (`max depth = 3`) for difficult IK transitions; highly constrained targets may still fail.
 - Singularity events are surfaced in status (especially wrist singular neighborhoods).
 - This implementation relies on local Python + Node runtime and does not currently include production deployment packaging.
+
+## 8) URDF Source
+
+Bundled `kuka_iiwa` assets were extracted from the `pybullet` source package (`pybullet_data/kuka_iiwa`) for local web visualization.

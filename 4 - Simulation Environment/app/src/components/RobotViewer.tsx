@@ -1,8 +1,11 @@
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
-import type { Object3D } from "three";
+import { Group, Mesh, MeshPhongMaterial } from "three";
+import type { LoadingManager, Object3D } from "three";
 import URDFLoader from "urdf-loader";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
 interface RobotViewerProps {
   linkFrames: number[][][];
@@ -10,15 +13,145 @@ interface RobotViewerProps {
   currentPoseText: string;
 }
 
-function UrdfModel({ url, onReadyState }: { url: string; onReadyState: (state: "loaded" | "failed") => void }) {
-  const [robot, setRobot] = useState<Object3D | null>(null);
+interface UrdfRobotLike extends Object3D {
+  joints?: Record<string, unknown>;
+  setJointValue?: (jointName: string, value: number) => void;
+}
+
+type MeshDone = (mesh: Object3D, err?: Error) => void;
+
+// Visual mapping from KR500 planner joints to surrogate URDF joints.
+// This keeps the URDF in a stable posture at planner home q=[0,-90,90,0,0,0].
+const URDF_HOME_Q_DEG = [0, -90, 90, 0, 0, 0];
+const URDF_JOINT_SCALE = [1, 1, 1, 1, 1, 1];
+const URDF_JOINT_BIAS_DEG = [0, 0, 0, 0, 0, 0];
+
+const JOINT_NAME_CANDIDATES: string[][] = [
+  ["joint_1", "joint1", "joint_a1", "a1", "A1"],
+  ["joint_2", "joint2", "joint_a2", "a2", "A2"],
+  ["joint_3", "joint3", "joint_a3", "a3", "A3"],
+  ["joint_4", "joint4", "joint_a4", "a4", "A4"],
+  ["joint_5", "joint5", "joint_a5", "a5", "A5"],
+  ["joint_6", "joint6", "joint_a6", "a6", "A6"],
+  ["joint_7", "joint7", "joint_a7", "a7", "A7"],
+];
+
+function findJointName(jointKeys: string[], index: number): string | null {
+  const jointNumber = String(index + 1);
+  const candidates = JOINT_NAME_CANDIDATES[index] || [];
+  for (const candidate of candidates) {
+    const hit = jointKeys.find((k) => k.toLowerCase() === candidate.toLowerCase());
+    if (hit) {
+      return hit;
+    }
+  }
+
+  const fuzzy = jointKeys.find((k) => {
+    const key = k.toLowerCase();
+    return key.endsWith(`joint_${jointNumber}`) || key.endsWith(`joint${jointNumber}`) || key.includes(`joint_${jointNumber}`);
+  });
+  if (fuzzy) {
+    return fuzzy;
+  }
+
+  return null;
+}
+
+function mapPlannerJointsToUrdf(qDeg: number[]): number[] {
+  return qDeg.map((q, i) => (q - URDF_HOME_Q_DEG[i]) * URDF_JOINT_SCALE[i] + URDF_JOINT_BIAS_DEG[i]);
+}
+
+function applyUrdfJointValues(robot: UrdfRobotLike, qDeg: number[]) {
+  if (!robot?.setJointValue) {
+    return;
+  }
+
+  const mappedQDeg = mapPlannerJointsToUrdf(qDeg);
+  const jointKeys = Object.keys(robot.joints || {});
+  for (let i = 0; i < 6; i += 1) {
+    const jointName = findJointName(jointKeys, i);
+    if (!jointName) {
+      continue;
+    }
+    robot.setJointValue(jointName, (mappedQDeg[i] * Math.PI) / 180);
+  }
+
+  // Keep extra joints (such as a 7th axis) deterministic for non-6DOF URDF models.
+  const joint7 = findJointName(jointKeys, 6);
+  if (joint7) {
+    robot.setJointValue(joint7, 0);
+  }
+
+  robot.updateMatrixWorld(true);
+}
+
+function loadUrdfMesh(path: string, manager: LoadingManager, done: MeshDone) {
+  const lower = path.toLowerCase();
+
+  if (lower.endsWith(".stl")) {
+    const loader = new STLLoader(manager);
+    loader.load(
+      path,
+      (geom) => {
+        const mesh = new Mesh(geom, new MeshPhongMaterial({ color: 0xa0aab8 }));
+        done(mesh);
+      },
+      undefined,
+      (err) => {
+        const error = err instanceof Error ? err : new Error(String(err));
+        done(new Group(), error);
+      },
+    );
+    return;
+  }
+
+  if (lower.endsWith(".obj")) {
+    const loader = new OBJLoader(manager);
+    loader.load(
+      path,
+      (obj) => done(obj),
+      undefined,
+      (err) => {
+        const error = err instanceof Error ? err : new Error(String(err));
+        done(new Group(), error);
+      },
+    );
+    return;
+  }
+
+  done(new Group(), new Error(`Unsupported mesh extension for ${path}`));
+}
+
+function robotPointToScene(pointMm: [number, number, number]): [number, number, number] {
+  // Robot FK uses Z-up. Three.js scene uses Y-up.
+  // Map [x, y, z]_robot(mm) -> [x, y, z]_scene(m).
+  return [pointMm[0] / 1000, pointMm[2] / 1000, -pointMm[1] / 1000];
+}
+
+function UrdfModel({
+  url,
+  packageRoot,
+  currentQ,
+  onReadyState,
+}: {
+  url: string;
+  packageRoot: string;
+  currentQ: number[];
+  onReadyState: (state: "loaded" | "failed") => void;
+}) {
+  const [robot, setRobot] = useState<UrdfRobotLike | null>(null);
 
   useEffect(() => {
     const loader = new URDFLoader();
+    // Supports ROS-style package:// URIs in URDF mesh paths.
+    (loader as unknown as { packages?: string }).packages = packageRoot;
+    (loader as unknown as { loadMeshCb?: (path: string, manager: LoadingManager, done: MeshDone) => void }).loadMeshCb = loadUrdfMesh;
     loader.load(
       url,
       (loaded) => {
-        setRobot(loaded);
+        const urdfRobot = loaded as UrdfRobotLike;
+        setRobot(urdfRobot);
+        // Mesh assets may continue attaching asynchronously after parse.
         onReadyState("loaded");
       },
       undefined,
@@ -27,20 +160,27 @@ function UrdfModel({ url, onReadyState }: { url: string; onReadyState: (state: "
         onReadyState("failed");
       },
     );
-  }, [url, onReadyState]);
+  }, [url, packageRoot, onReadyState]);
+
+  useEffect(() => {
+    if (!robot) {
+      return;
+    }
+    applyUrdfJointValues(robot, currentQ);
+  }, [robot, currentQ]);
 
   if (!robot) {
     return null;
   }
 
-  return <primitive object={robot} scale={0.001} />;
+  return <primitive object={robot} scale={1} rotation={[-Math.PI / 2, 0, 0]} />;
 }
 
 function ProceduralRobot({ linkFrames }: { linkFrames: number[][][] }) {
   const points = useMemo(() => {
     const pts: [number, number, number][] = [[0, 0, 0]];
     for (const frame of linkFrames) {
-      pts.push([frame[0][3] / 1000, frame[1][3] / 1000, frame[2][3] / 1000]);
+      pts.push(robotPointToScene([frame[0][3], frame[1][3], frame[2][3]]));
     }
     return pts;
   }, [linkFrames]);
@@ -52,12 +192,12 @@ function ProceduralRobot({ linkFrames }: { linkFrames: number[][][] }) {
       {points.map((point, idx) => (
         <mesh key={`joint-${idx}`} position={point}>
           <sphereGeometry args={[0.04, 20, 20]} />
-          <meshStandardMaterial color={idx === points.length - 1 ? "#f97316" : "#0ea5e9"} roughness={0.4} metalness={0.2} />
+          <meshStandardMaterial color={idx === points.length - 1 ? "#f97316" : "#1d4ed8"} roughness={0.4} metalness={0.2} />
         </mesh>
       ))}
 
       {points.slice(1).map((point, idx) => (
-        <Line key={`link-${idx}`} points={[points[idx], point]} color="#38bdf8" lineWidth={3} />
+        <Line key={`link-${idx}`} points={[points[idx], point]} color="#000000" lineWidth={3.6} />
       ))}
 
       <Line points={[tcp, [tcp[0] + 0.2, tcp[1], tcp[2]]]} color="#ef4444" lineWidth={2} />
@@ -68,7 +208,9 @@ function ProceduralRobot({ linkFrames }: { linkFrames: number[][][] }) {
 }
 
 export default function RobotViewer({ linkFrames, currentQ, currentPoseText }: RobotViewerProps) {
+  // URDF stays muted unless explicitly enabled in app/.env.
   const urdfUrl = import.meta.env.VITE_URDF_URL as string | undefined;
+  const urdfPackageRoot = (import.meta.env.VITE_URDF_PACKAGES as string | undefined) || "/assets/robot_urdf/kuka_iiwa";
   const [urdfState, setUrdfState] = useState<"idle" | "loaded" | "failed">("idle");
 
   return (
@@ -102,8 +244,8 @@ export default function RobotViewer({ linkFrames, currentQ, currentPoseText }: R
           <Line points={[[0, 0, 0], [0, 1, 0]]} color="#22c55e" lineWidth={2} />
           <Line points={[[0, 0, 0], [0, 0, 1]]} color="#3b82f6" lineWidth={2} />
 
-          {urdfUrl ? <UrdfModel url={urdfUrl} onReadyState={setUrdfState} /> : null}
-          <ProceduralRobot linkFrames={linkFrames} />
+          {urdfUrl ? <UrdfModel url={urdfUrl} packageRoot={urdfPackageRoot} currentQ={currentQ} onReadyState={setUrdfState} /> : null}
+          {urdfUrl && urdfState === "loaded" ? null : <ProceduralRobot linkFrames={linkFrames} />}
 
           {!linkFrames.length ? (
             <Html center>
