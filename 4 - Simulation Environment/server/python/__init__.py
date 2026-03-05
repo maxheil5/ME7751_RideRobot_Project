@@ -1,1 +1,1 @@
-﻿# Backend Python package for Task D FK/IK wrappers.
+# Backend Python package for Task D FK/IK wrappers.

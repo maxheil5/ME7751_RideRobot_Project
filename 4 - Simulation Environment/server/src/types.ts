@@ -1,4 +1,4 @@
-﻿export type Mat4 = number[][];
+export type Mat4 = number[][];
 
 export interface ApiErrorPayload {
   error: {

@@ -1,4 +1,4 @@
-﻿import cors from "cors";
+import cors from "cors";
 import express from "express";
 import { PythonBridgeError, runPythonAction } from "./pythonBridge.js";
 import type { ApiErrorPayload, FkBatchResponse, FkResponse, IkResponse, Mat4 } from "./types.js";
