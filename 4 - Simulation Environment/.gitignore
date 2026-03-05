@@ -1,0 +1,6 @@
+﻿app/node_modules/
+app/dist/
+server/node_modules/
+server/dist/
+server/python/__pycache__/
+*.log
