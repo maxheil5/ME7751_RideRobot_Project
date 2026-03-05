@@ -1,6 +1,6 @@
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Group, Mesh, MeshPhongMaterial } from "three";
 import type { LoadingManager, Object3D } from "three";
 import URDFLoader from "urdf-loader";
@@ -212,6 +212,45 @@ export default function RobotViewer({ linkFrames, currentQ, currentPoseText }: R
   const urdfUrl = import.meta.env.VITE_URDF_URL as string | undefined;
   const urdfPackageRoot = (import.meta.env.VITE_URDF_PACKAGES as string | undefined) || "/assets/robot_urdf/kuka_iiwa";
   const [urdfState, setUrdfState] = useState<"idle" | "loaded" | "failed">("idle");
+  const cameraRef = useRef<any>(null);
+  const controlsRef = useRef<any>(null);
+
+  function recenterView() {
+    if (!cameraRef.current || !controlsRef.current) {
+      return;
+    }
+
+    const points = linkFrames.map((frame) => robotPointToScene([frame[0][3], frame[1][3], frame[2][3]]));
+    points.push([0, 0, 0]);
+
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let minZ = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
+    let maxZ = Number.NEGATIVE_INFINITY;
+
+    for (const p of points) {
+      minX = Math.min(minX, p[0]);
+      minY = Math.min(minY, p[1]);
+      minZ = Math.min(minZ, p[2]);
+      maxX = Math.max(maxX, p[0]);
+      maxY = Math.max(maxY, p[1]);
+      maxZ = Math.max(maxZ, p[2]);
+    }
+
+    const centerX = (minX + maxX) * 0.5;
+    const centerY = (minY + maxY) * 0.5;
+    const centerZ = (minZ + maxZ) * 0.5;
+
+    const span = Math.max(maxX - minX, maxY - minY, maxZ - minZ, 0.8);
+    const distance = Math.max(2.0, span * 2.6);
+
+    controlsRef.current.target.set(centerX, centerY, centerZ);
+    cameraRef.current.position.set(centerX + distance, centerY + distance * 0.75, centerZ + distance);
+    cameraRef.current.updateProjectionMatrix();
+    controlsRef.current.update();
+  }
 
   return (
     <section className="panel viewer-panel">
@@ -229,7 +268,15 @@ export default function RobotViewer({ linkFrames, currentQ, currentPoseText }: R
       </div>
 
       <div className="viewer-canvas-wrap">
-        <Canvas camera={{ position: [3.5, 2.5, 3.5], fov: 45 }}>
+        <button className="viewer-home-btn" onClick={recenterView} title="Recenter camera on robot">
+          Home
+        </button>
+        <Canvas
+          camera={{ position: [3.5, 2.5, 3.5], fov: 45 }}
+          onCreated={({ camera }) => {
+            cameraRef.current = camera;
+          }}
+        >
           <color attach="background" args={["#f4f8ff"]} />
           <ambientLight intensity={0.65} />
           <directionalLight position={[3, 5, 2]} intensity={1.1} />
@@ -253,7 +300,7 @@ export default function RobotViewer({ linkFrames, currentQ, currentPoseText }: R
             </Html>
           ) : null}
 
-          <OrbitControls makeDefault />
+          <OrbitControls makeDefault ref={controlsRef} />
         </Canvas>
       </div>
     </section>

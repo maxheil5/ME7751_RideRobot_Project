@@ -22,20 +22,36 @@ This repo contains (1) kinematic derivations (DH/FK/IK), (2) a simulation enviro
 - `10 - Final Submission/` — report + submission-ready artifacts
 
 ## Robot Model
-The project uses a 6-DOF serial robot model with a **publicly available DH table**.  
-(Exact robot selection + citation will be documented in `1 - Requirements & References/robot-dh-sources/`.)
+The project uses a 6-DOF serial industrial robot model based on **KUKA KR 500 R2830** DH parameters.
+- DH reference and citation notes are in `1 - Requirements & References/robot-dh-sources/`.
+- Core DH parameter module: `3 - Software (Core Code)/src/kinematics/dh_parameters.py`
 
-## How to Run (will be filled in)
+## How to Run
 ### Simulation
-1. Create environment
-2. Install dependencies
-3. Run a scenario script
-4. Render outputs to `4 - Simulation Environment/renders/`
+Task D app runs as frontend + backend.
+
+1. Backend terminal:
+   - `cd "4 - Simulation Environment/server"`
+   - `python -m pip install numpy`
+   - `npm install`
+   - `npm run dev`
+2. Frontend terminal:
+   - `cd "4 - Simulation Environment/app"`
+   - `npm install`
+   - `npm run dev`
+3. Open the app at:
+   - `http://localhost:5173`
+
+Notes:
+- Frontend proxy sends `/api/*` requests to backend `http://localhost:8787`.
+- If backend is not running, frontend actions will return HTTP/proxy errors.
+- Detailed app docs are in `4 - Simulation Environment/README.md`.
 
 ### Physical Demo
 - CAD + STL: `5 - CAD & 3D Print/`
 - Electronics + control: `6 - Electronics & Controls/` and `7 - Firmware/`
 - Validation: `8 - Testing & Validation/`
+- Physical demo work is extension scope and may be incomplete relative to course Task A-D deliverables.
 
 ## Milestones (high-level)
 - DH table selected + cited
