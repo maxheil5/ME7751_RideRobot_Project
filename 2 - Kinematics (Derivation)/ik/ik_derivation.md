@@ -502,14 +502,3 @@ q_4=-\theta_4,\qquad q_5=\theta_5,\qquad q_6=\pi-\theta_6.
 $$
 
 If $s5\le\varepsilon$, use the singular-case rules in Section 9.3.
-
----
-
-## 13) Implementation note (what your IK function should return)
-Your IK function should:
-- Input: ${}^{0}T_6$ (or $R_{06},p_{06}$)
-- Output: all valid solutions $\{q^{(k)}\}$, $k=1,\dots,N$, with $N\le 8$
-- Reject unreachable targets ($|D|>1$)
-- Handle wrist singularities ($s5\approx 0$)
-- Filter by joint limits
-- Optionally sort solutions by distance to a seed configuration
