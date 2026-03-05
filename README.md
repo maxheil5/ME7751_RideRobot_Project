@@ -46,6 +46,7 @@ Notes:
 - Frontend proxy sends `/api/*` requests to backend `http://localhost:8787`.
 - If backend is not running, frontend actions will return HTTP/proxy errors.
 - Detailed app docs are in `4 - Simulation Environment/README.md`.
+- AI Tools were used to help create the app and simulation environment.
 
 ### Physical Demo
 - CAD + STL: `5 - CAD & 3D Print/`
