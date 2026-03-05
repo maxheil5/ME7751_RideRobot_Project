@@ -62,7 +62,7 @@ function ProceduralRobot({ linkFrames }: { linkFrames: number[][][] }) {
 
       <Line points={[tcp, [tcp[0] + 0.2, tcp[1], tcp[2]]]} color="#ef4444" lineWidth={2} />
       <Line points={[tcp, [tcp[0], tcp[1] + 0.2, tcp[2]]]} color="#22c55e" lineWidth={2} />
-      <Line points={[tcp, [tcp[0], tcp[1], tcp[2] + 0.2]]]} color="#3b82f6" lineWidth={2} />
+      <Line points={[tcp, [tcp[0], tcp[1], tcp[2] + 0.2]]} color="#3b82f6" lineWidth={2} />
     </group>
   );
 }
