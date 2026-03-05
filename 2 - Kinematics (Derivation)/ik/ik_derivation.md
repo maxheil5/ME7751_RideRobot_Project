@@ -241,12 +241,10 @@ $$
 
 Then:
 
-$$
-q_2^{(\pm)} =
-\mathrm{atan2}(z,\ r)
--
-\mathrm{atan2}\!\left(L\sin\gamma^{(\pm)},\ A + L\cos\gamma^{(\pm)}\right),
-$$
+
+$q_2^{(\pm)} = \mathrm{atan2}(z,\ r)$
+$\mathrm{atan2}\!\left(L\sin\gamma^{(\pm)},\ A + L\cos\gamma^{(\pm)}\right)$,
+
 
 $$
 q_3^{(\pm)} = \gamma^{(\pm)} - \phi.
