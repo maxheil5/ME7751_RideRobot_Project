@@ -339,23 +339,23 @@ $$
 When $s5 \approx 0$, the wrist loses a DOF and $\theta_4$ and $\theta_6$ become coupled.
 
 - If $c5=R_{36}(2,3)\approx +1$, then $\theta_5\approx 0$ and only the sum
-  $$
-  \psi=\theta_4+\theta_6
-  $$
+
+  $\psi=\theta_4+\theta_6$
+  
   is observable. One consistent extraction is:
-  $$
-  \psi = \mathrm{atan2}\!\left(-R_{36}(1,2),\ R_{36}(1,1)\right).
-  $$
+  
+  $\psi = \mathrm{atan2}\!\left(-R_{36}(1,2),\ R_{36}(1,1)\right).$
+  
   A simple choice is $\theta_4=0$, $\theta_6=\psi$.
 
 - If $c5=R_{36}(2,3)\approx -1$, then $\theta_5\approx \pi$ and only the difference
-  $$
-  \psi=\theta_4-\theta_6
-  $$
+  
+  $\psi=\theta_4-\theta_6$
+
   is observable. One consistent extraction is:
-  $$
-  \psi = \mathrm{atan2}\!\left(-R_{36}(1,2),\ -R_{36}(1,1)\right).
-  $$
+  
+  $\psi = \mathrm{atan2}\!\left(-R_{36}(1,2),\ -R_{36}(1,1)\right).$
+  
   A simple choice is $\theta_4=0$, $\theta_6=-\psi$.
 
 Then map to RoboDK joints:
@@ -368,24 +368,214 @@ $$
 
 ---
 
-## 10) Full branch enumeration (up to 8 solutions)
-- Shoulder: 2 branches (S1, S2)
-- Elbow: 2 branches per shoulder ($+$, $-$)
-- Wrist: 2 branches per arm solution (W1, W2) unless singular
+## 10) Explicit solution enumeration (write out all branches)
 
-Total candidates:
+In the **non-singular** case ($s5>\varepsilon$), this robot admits up to **8** closed-form IK solutions.  
+We enumerate them explicitly as the Cartesian product:
+
+- Shoulder branch $S\in\{a,b\}$
+- Elbow branch $E\in\{+,-\}$
+- Wrist branch $W\in\{1,2\}$
+
+so the candidate solutions are:
 
 $$
-N_{\max}=2\times 2\times 2 = 8.
+q^{(S,E,W)} =
+\begin{bmatrix}
+q_1^{(S)}\\
+q_2^{(S,E)}\\
+q_3^{(S,E)}\\
+q_4^{(S,E,W)}\\
+q_5^{(S,E,W)}\\
+q_6^{(S,E,W)}
+\end{bmatrix},
+\qquad (S,E,W)\in\{a,b\}\times\{+,-\}\times\{1,2\}.
 $$
 
-For each candidate:
-1. Compute $p_{wc}$.
-2. Choose shoulder $(q_1,B)$.
-3. Solve elbow $(q_2,q_3)$ via $(r,z)$ and $D$.
-4. Compute $R_{36}=R_{03}^T R_{06}$.
-5. Solve wrist $(q_4,q_5,q_6)$ (or singular-case logic).
-6. Normalize and filter by joint limits.
+> After computing these 8 candidates, reject any that are unreachable ($|D|>1$) or violate joint limits.
+
+---
+
+### 10.1 Common quantities (computed once from the target pose)
+
+Given ${}^0T_6=[R_{06},p_{06}]$, compute:
+
+$$
+p_{wc} = p_{06} - 290\,R_{06}\begin{bmatrix}0\\0\\1\end{bmatrix} =
+\begin{bmatrix}
+x_w\\y_w\\z_w
+\end{bmatrix},
+\qquad
+\rho=\sqrt{x_w^2+y_w^2}.
+$$
+
+Set constants:
+
+$$
+A=1300,\qquad
+L=\sqrt{1025^2+55^2},\qquad
+\phi=\mathrm{atan2}(55,1025).
+$$
+
+---
+
+### 10.2 Shoulder branches (2)
+
+$$
+q_1^{(a)}=\mathrm{atan2}(-y_w,x_w),\qquad B^{(a)}=+\rho,
+$$
+
+$$
+q_1^{(b)}=q_1^{(a)}+\pi,\qquad B^{(b)}=-\rho.
+$$
+
+---
+
+### 10.3 Elbow branches (2 per shoulder)
+
+For each shoulder branch $S\in\{a,b\}$, define:
+
+$$
+r^{(S)} = B^{(S)}-500,\qquad z^{(S)} = 1045-z_w.
+$$
+
+Then compute:
+
+$$
+D^{(S)}=\frac{\left(r^{(S)}\right)^2+\left(z^{(S)}\right)^2-A^2-L^2}{2AL}.
+$$
+
+Reachability condition:
+
+$$
+\left|D^{(S)}\right|\le 1.
+$$
+
+Define the two elbow angles:
+
+$$
+\gamma^{(S,+)}=\mathrm{atan2}\!\left(+\sqrt{1-\left(D^{(S)}\right)^2},\ D^{(S)}\right),
+$$
+
+$$
+\gamma^{(S,-)}=\mathrm{atan2}\!\left(-\sqrt{1-\left(D^{(S)}\right)^2},\ D^{(S)}\right).
+$$
+
+Then the elbow-branch joint angles are:
+
+$$
+q_2^{(S,E)}=\mathrm{atan2}\!\left(z^{(S)},r^{(S)}\right)
+-\mathrm{atan2}\!\left(L\sin\gamma^{(S,E)},\ A+L\cos\gamma^{(S,E)}\right),
+\qquad E\in\{+,-\},
+$$
+
+$$
+q_3^{(S,E)}=\gamma^{(S,E)}-\phi.
+$$
+
+---
+
+### 10.4 Compute $R_{36}^{(S,E)}$ (needed for wrist solutions)
+
+For each $(S,E)$ pair, form:
+
+$$
+c1^{(S)}=\cos q_1^{(S)},\quad s1^{(S)}=\sin q_1^{(S)},
+$$
+
+$$
+c_{23}^{(S,E)}=\cos\!\left(q_2^{(S,E)}+q_3^{(S,E)}\right),\quad
+s_{23}^{(S,E)}=\sin\!\left(q_2^{(S,E)}+q_3^{(S,E)}\right).
+$$
+
+Then:
+
+$$
+R_{03}^{(S,E)} =
+\begin{bmatrix}
+s_{23}^{(S,E)}c1^{(S)} & c_{23}^{(S,E)}c1^{(S)} & s1^{(S)}\\
+-s_{23}^{(S,E)}s1^{(S)} & -c_{23}^{(S,E)}s1^{(S)} & c1^{(S)}\\
+c_{23}^{(S,E)} & -s_{23}^{(S,E)} & 0
+\end{bmatrix},
+$$
+
+and
+
+$$
+R_{36}^{(S,E)}=\left(R_{03}^{(S,E)}\right)^T R_{06}.
+$$
+
+---
+
+### 10.5 Wrist branches (2 per $(S,E)$), non-singular case
+
+For each $(S,E)$, compute:
+
+$$
+c5^{(S,E)}=R_{36}^{(S,E)}(2,3),
+\qquad
+s5^{(S,E)}=\sqrt{\left(R_{36}^{(S,E)}(2,1)\right)^2+\left(R_{36}^{(S,E)}(2,2)\right)^2}.
+$$
+
+Assume non-singular:
+
+$$
+s5^{(S,E)}>\varepsilon.
+$$
+
+**Wrist branch W1 (no flip):**
+
+$$
+\theta_5^{(S,E,1)}=\mathrm{atan2}\!\left(s5^{(S,E)},\ c5^{(S,E)}\right),
+$$
+
+$$
+\theta_4^{(S,E,1)}=\mathrm{atan2}\!\left(R_{36}^{(S,E)}(3,3),\ -R_{36}^{(S,E)}(1,3)\right),
+$$
+
+$$
+\theta_6^{(S,E,1)}=\mathrm{atan2}\!\left(-R_{36}^{(S,E)}(2,2),\ R_{36}^{(S,E)}(2,1)\right).
+$$
+
+**Wrist branch W2 (flip):**
+
+$$
+\theta_5^{(S,E,2)}=-\theta_5^{(S,E,1)},
+\qquad
+\theta_4^{(S,E,2)}=\theta_4^{(S,E,1)}+\pi,
+\qquad
+\theta_6^{(S,E,2)}=\theta_6^{(S,E,1)}+\pi.
+$$
+
+Map to RoboDK joint angles (recall $\theta_4=-q_4$, $\theta_5=q_5$, $\theta_6=\pi-q_6$):
+
+$$
+q_4^{(S,E,W)}=-\theta_4^{(S,E,W)},
+\qquad
+q_5^{(S,E,W)}=\theta_5^{(S,E,W)},
+\qquad
+q_6^{(S,E,W)}=\pi-\theta_6^{(S,E,W)}.
+$$
+
+---
+
+### 10.6 The 8 explicit candidate solutions
+
+Using the notation above, the **8** candidates are:
+
+1. $q^{(a,+,1)} = \big[q_1^{(a)},\ q_2^{(a,+)},\ q_3^{(a,+)},\ q_4^{(a,+,1)},\ q_5^{(a,+,1)},\ q_6^{(a,+,1)}\big]^T$  
+2. $q^{(a,+,2)} = \big[q_1^{(a)},\ q_2^{(a,+)},\ q_3^{(a,+)},\ q_4^{(a,+,2)},\ q_5^{(a,+,2)},\ q_6^{(a,+,2)}\big]^T$  
+3. $q^{(a,-,1)} = \big[q_1^{(a)},\ q_2^{(a,-)},\ q_3^{(a,-)},\ q_4^{(a,-,1)},\ q_5^{(a,-,1)},\ q_6^{(a,-,1)}\big]^T$  
+4. $q^{(a,-,2)} = \big[q_1^{(a)},\ q_2^{(a,-)},\ q_3^{(a,-)},\ q_4^{(a,-,2)},\ q_5^{(a,-,2)},\ q_6^{(a,-,2)}\big]^T$  
+5. $q^{(b,+,1)} = \big[q_1^{(b)},\ q_2^{(b,+)},\ q_3^{(b,+)},\ q_4^{(b,+,1)},\ q_5^{(b,+,1)},\ q_6^{(b,+,1)}\big]^T$  
+6. $q^{(b,+,2)} = \big[q_1^{(b)},\ q_2^{(b,+)},\ q_3^{(b,+)},\ q_4^{(b,+,2)},\ q_5^{(b,+,2)},\ q_6^{(b,+,2)}\big]^T$  
+7. $q^{(b,-,1)} = \big[q_1^{(b)},\ q_2^{(b,-)},\ q_3^{(b,-)},\ q_4^{(b,-,1)},\ q_5^{(b,-,1)},\ q_6^{(b,-,1)}\big]^T$  
+8. $q^{(b,-,2)} = \big[q_1^{(b)},\ q_2^{(b,-)},\ q_3^{(b,-)},\ q_4^{(b,-,2)},\ q_5^{(b,-,2)},\ q_6^{(b,-,2)}\big]^T$
+
+---
+
+### 10.7 Singular case note (when fewer than 8 exist)
+If $s5^{(S,E)}\le\varepsilon$ for some $(S,E)$, then $\theta_5$ is near $0$ or $\pi$ and $\theta_4,\theta_6$ become coupled. In that case, replace the wrist-branch formulas above with the singular-case rules from Section 9.3, and do not expect two distinct wrist branches for that $(S,E)$.
 
 ---
 
