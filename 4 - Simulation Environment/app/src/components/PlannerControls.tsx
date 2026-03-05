@@ -1,4 +1,4 @@
-﻿import type { MotionType, MoveJProfile } from "../types";
+import type { MotionType, MoveJProfile } from "../types";
 
 interface PlannerControlsProps {
   motionType: MotionType;

@@ -1,4 +1,4 @@
-﻿import type { Limits, Pose, WaypointMode } from "../types";
+import type { Limits, Pose, WaypointMode } from "../types";
 
 interface WaypointFormProps {
   mode: WaypointMode;

@@ -1,4 +1,4 @@
-﻿import type { Pose } from "../types";
+import type { Pose } from "../types";
 
 const DEG2RAD = Math.PI / 180;
 const RAD2DEG = 180 / Math.PI;

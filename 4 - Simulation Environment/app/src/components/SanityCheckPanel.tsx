@@ -1,4 +1,4 @@
-﻿import type { SanityCheckResult } from "../types";
+import type { SanityCheckResult } from "../types";
 
 interface SanityCheckPanelProps {
   runningTestId: string | null;

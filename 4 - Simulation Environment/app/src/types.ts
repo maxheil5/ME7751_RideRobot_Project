@@ -1,4 +1,4 @@
-﻿export type WaypointMode = "joint" | "pose";
+export type WaypointMode = "joint" | "pose";
 export type MotionType = "MoveJ" | "MoveL";
 export type MoveJProfile = "cubic" | "trapezoid";
 

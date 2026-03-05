@@ -1,4 +1,4 @@
-﻿import type { FkBatchResult, FkResult, IkResult, Limits } from "../types";
+import type { FkBatchResult, FkResult, IkResult, Limits } from "../types";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 

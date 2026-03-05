@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import JointPlot from "./components/JointPlot";
 import PlannerControls from "./components/PlannerControls";
 import RobotViewer from "./components/RobotViewer";

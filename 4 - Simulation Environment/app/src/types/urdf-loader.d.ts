@@ -1,4 +1,4 @@
-﻿declare module "urdf-loader" {
+declare module "urdf-loader" {
   import type { LoadingManager, Object3D } from "three";
 
   export default class URDFLoader {

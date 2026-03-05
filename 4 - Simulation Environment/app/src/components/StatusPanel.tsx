@@ -1,4 +1,4 @@
-﻿import type { StatusMessage } from "../types";
+import type { StatusMessage } from "../types";
 
 interface StatusPanelProps {
   statuses: StatusMessage[];

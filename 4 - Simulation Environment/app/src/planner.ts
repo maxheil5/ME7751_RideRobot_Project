@@ -1,4 +1,4 @@
-﻿import { fkBatch, getLimits, ik } from "./kinematics/api";
+import { fkBatch, getLimits, ik } from "./kinematics/api";
 import { jointDistanceSqDeg } from "./kinematics/conversions";
 import { interpolatePose } from "./se3";
 import type { MoveJProfile, PlannerFailure, TrajectoryResult } from "./types";
